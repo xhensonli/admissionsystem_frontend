@@ -1,0 +1,25 @@
+html{
+    height: 100%;
+}
+body{
+    height: 100%;
+}
+html ::-webkit-scrollbar{
+    display: none;
+}
+
+.clearfix:before,.clearfix:after{
+    content: '';
+    display: table;
+    clear: both;
+}
+
+.el-drawer__body {
+    overflow: auto;
+    /* overflow-x: auto; */
+}
+
+/*2.隐藏滚动条，太丑了*/
+.el-drawer__container ::-webkit-scrollbar{
+    display: none;
+}
