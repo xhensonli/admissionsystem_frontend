@@ -15,6 +15,7 @@
                 <div id="welcome-system-name-eng">
                     ADMISSION SYSTEM
                 </div>
+
             </div>
 
             <div id="login-form" class="container-fluid">
@@ -28,12 +29,14 @@
                         <el-input placeholder="用户名" v-model="username"></el-input>
                     </div>
                     <div id="login-form-pass">
-                        <el-input placeholder="密码" type="password" v-model="password" show-password></el-input>
+                        <el-input placeholder="密码" type="password" v-model="password" show-password
+                                  @keyup.enter.native="doLogin"
+                        ></el-input>
                     </div>
 
 
                     <div id="login-form-submit" class="clearfix">
-                        <el-button type="primary" :loading="loading" @click="doLogin">登录</el-button>
+                        <el-button type="primary" :loading="loading" @click="doLogin" >登录</el-button>
                     </div>
                 </el-col>
 

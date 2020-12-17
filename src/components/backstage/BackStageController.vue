@@ -9,6 +9,8 @@
                     ADMISSION SYSTEM
                 </div>
             </div>
+
+
             <el-popover
                     placement="top-start"
                     width="200"
@@ -82,6 +84,10 @@
             },
             handleClose(key, keyPath) {
                 console.log(key, keyPath);
+            },
+            //for nav bar
+            handleSelect(key, keyPath) {
+             console.log(key, keyPath);
             },
             logout(){
                 request({

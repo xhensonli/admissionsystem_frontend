@@ -147,9 +147,14 @@
                     <div class="operation-content-major">
                         <el-button type="primary" class="el-icon-download"
                                    @click="downloadResult"
-                                    :loading="downloading">
+                                    :loading="downloadingResult">
                             导出录取结果
                         </el-button>
+                      <el-button type="primary" class="el-icon-download"
+                                 @click="downloadExitQueue"
+                                 :loading="downloadingExitQueue">
+                        导出退档结果
+                      </el-button>
                     </div>
                 </div>
             </div>
@@ -203,7 +208,8 @@
                 state: 0,
                 loading: null,
                 drawer: false,
-                downloading: false,
+                downloadingResult: false,
+                downloadingExitQueue: false,
                 statePermissionTable: {
                     uploadFile: [0, 1, 2, 3, 5],
                     preEnroll: [3],
@@ -346,7 +352,7 @@
                 }).finally( () => {this.setUnloading()})
             },
             downloadResult(){
-                this.downloading = true;
+                this.downloadingResult = true;
                 request({
                     url: 'login/checkLogin'
                 }).then( res => {
@@ -368,6 +374,29 @@
                     }
                 })
             },
+          downloadExitQueue(){
+            this.downloadingExitQueue = true;
+            request({
+              url: 'login/checkLogin'
+            }).then( res => {
+              if (res.code === '010'){
+                this.$router.push('/login');
+              } else if (res.code === '000') {
+                request({
+                  url: 'file/exportExit',
+                  responseType: 'blob'
+                }).then((res) => {
+                  const url = window.URL.createObjectURL(new Blob([res]));
+                  const link = document.createElement('a');
+                  link.href = url;
+                  link.setAttribute('download', '退档结果.xlsx');
+                  document.body.appendChild(link);
+                  link.click();
+                  this.downloading = false;
+                });
+              }
+            })
+          },
             setUnloading(){
                 this.loading.close();
             } ,
