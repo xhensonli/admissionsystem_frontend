@@ -1,4 +1,5 @@
-<template>
+<script src="../../../babel.config.js"></script>
+   <template>
     <div id="back-stage-controller" class="clearfix">
         <div id="back-stage-controller-header">
             <div id="back-stage-header-text">
@@ -9,8 +10,49 @@
                     ADMISSION SYSTEM
                 </div>
             </div>
+            <div id="option-menu">
+              <el-menu class="el-menu-demo" mode="horizontal"
+                       background-color="#0984d9"
+                       @select="handleSelect"
+                       text-color="#ffff"
+                       active-text-color=""
+              >
+                <el-submenu index="1">
+                  <template slot="title">导入文档</template>
+                  <el-upload
+                      action=""
+                      :http-request="uploadMajor"
+                      :show-file-list="false"
+                  >
+                  <el-menu-item index="1-1">导入专业录取计划文件</el-menu-item>
+                  </el-upload>
+                  <el-upload
+                      action=""
+                      :http-request="uploadStudent"
+                      :show-file-list="false"
+                  >
+                  <el-menu-item index="1-2">导入学生志愿信息文件</el-menu-item>
+                  </el-upload>
+                </el-submenu>
+                <el-submenu index="2">
+                  <template slot="title">预录取操作</template>
+                  <el-menu-item index="2-1" @click="doEnroll">开始预录取</el-menu-item>
+                  <el-menu-item index="2-2" @click="doAdjust">开始预调剂</el-menu-item>
+                </el-submenu>
+                <el-submenu index="3">
+                    <template slot="title">正式录取</template>
+                    <el-menu-item index="3-1" @click="doEnroll">开始录取</el-menu-item>
+                    <el-menu-item index="3-2" @click="doAdjust">执行调剂</el-menu-item>
+                </el-submenu>
+                <el-submenu index="4">
+                    <template slot="title">导出结果</template>
+                    <el-menu-item index="4-1" @click="downloadResult" class="el-icon-download">导出最终录取结果</el-menu-item><br>
+                    <el-menu-item index="4-2" @click="downloadExitQueue" class="el-icon-download">导出退档结果</el-menu-item>
+                </el-submenu>
 
+              </el-menu>
 
+            </div>
             <el-popover
                     placement="top-start"
                     width="200"
@@ -22,6 +64,7 @@
                 <div id="back-stage-controller-header-avatar"  slot="reference"></div>
             </el-popover>
         </div>
+
         <div id="back-stage-controller-menu">
             <el-menu
                     :router="true"
@@ -75,6 +118,7 @@
 
 <script>
     import {request} from "../../network/request";
+    import {fileRequest} from "../../network/fileRequest";
 
     export default {
         name: "BackStageController",
@@ -90,22 +134,204 @@
              console.log(key, keyPath);
             },
             logout(){
-                request({
-                    url: 'login/logout'
-                }).then( res => {
-                    if (res.code === '000'){
-                        this.$message.success('注销成功');
-                    } else {
-                        this.$message.error(res.message);
-                    }
-                    this.$router.push('/login');
-                })
+                  request({
+                      url: 'login/logout'
+                  }).then( res => {
+                      if (res.code === '000'){
+                          this.$message.success('注销成功');
+                      } else {
+                          this.$message.error(res.message);
+                      }
+                      this.$router.push('/login');
+                  })
+              },
+            getStatus(){
+              // this.setLoading();
+              request({
+                url: 'status/getStatus'
+              }).then(res => {
+                if (res.code === '000') {
+                  this.state = res.data === null ? 0 : res.data;
+                  this.$store.commit("setStatus", this.state)
+                } else {
+                  this.$message.error(res.message)
+                }
+              }).catch(err => {
+                this.$message.error('系统错误')
+              })
+            },
+            getLogList(){
+              request({
+                url: 'status/getLogList'
+              }).then(res => {
+                if (res.code === '000') {
+                  this.logList = res.data;
+                } else {
+                  this.$message.error(res.message)
+                }
+              }).catch(err => {
+                this.$message.error('系统错误')
+              })
+            },
+            uploadStudent(param){
+              const data = new FormData();
+              data.append('file', param.file);
+              fileRequest({
+                url: 'file/uploadStudent',
+                method: 'POST',
+                data: data,
+              }).then( res => {
+                if (res.code === '000'){
+                  this.$message.success('上传成功');
+                  this.getStatus();
+                  this.getLogList();
+                } else {
+                  this.$message.error('上传失败');
+                }
+              }).catch(err => {
+                this.$message.error('系统错误')
+              })
+            },
+            uploadMajor(param){
+              const data = new FormData();
+              data.append('file', param.file);
+              fileRequest({
+                url: 'file/uploadMajor',
+                method: 'POST',
+                data: data,
+              }).then( res => {
+                if (res.code === '000'){
+                  this.$message.success('上传成功');
+                  this.getStatus();
+                  this.getLogList();
+                } else {
+                  this.$message.error(res.message);
+                }
+              }).catch(err => {
+                this.$message.error('系统错误')
+              })
+            },
+            // reset(){
+            //   request({
+            //     url: 'status/reset'
+            //   }) .then( res => {
+            //     if (res.code === '000'){
+            //       this.$message.success('重置成功');
+            //       this.getStatus();
+            //       this.getLogList();
+            //     } else {
+            //       this.$message.error('重置失败');
+            //     }
+            //   }).catch(err => {
+            //     this.$message.error('系统错误')
+            //   })
+            // },
+            // formalReady(){
+            //   request({
+            //     url: 'student/formalReady'
+            //   }) .then( res => {
+            //     if (res.code === '000'){
+            //       this.$message.success('成功');
+            //       this.getStatus();
+            //       this.getLogList();
+            //     } else {
+            //       this.$message.error('失败');
+            //     }
+            //   }).catch(err => {
+            //     this.$message.error('系统错误')
+            //   })
+            // },
+            doEnroll(){
+              this.setLoading()
+              request({
+                url: 'student/doEnroll'
+              }) .then( res => {
+                if (res.code === '000'){
+                  this.$message.success('录取成功');
+                  this.getStatus();
+                  this.getLogList();
+                } else {
+                  this.$message.error(res.message);
+                }
+              }).catch(err => {
+                this.$message.error('系统错误')
+              }).finally( () => {this.setUnloading()})
+            },
+            doAdjust(){
+              this.setLoading()
+              request({
+                url: 'student/doAdjust'
+              }) .then( res => {
+                if (res.code === '000'){
+                  this.$message.success('调剂成功');
+                  this.getStatus();
+                  this.getLogList();
+                } else {
+                  this.$message.error(res.message);
+                }
+              }).catch(err => {
+                this.$message.error('系统错误')
+              }).finally( () => {this.setUnloading()})
+            },
+            downloadResult(){
+              this.downloadingResult = true;
+              request({
+                url: 'login/checkLogin'
+              }).then( res => {
+                if (res.code === '010'){
+                  this.$router.push('/login');
+                } else if (res.code === '000') {
+                  request({
+                    url: 'file/exportResult',
+                    // responseType: 'blob'
+                  }).then((res) => {
+                    if(res.code !== '000')
+                      this.$message.error(res.message)
+                    this.downloading = false;
+                  });
+                }
+              })
+            },
+            downloadExitQueue(){
+              this.downloadingExitQueue = true;
+              request({
+                url: 'login/checkLogin'
+              }).then( res => {
+                if (res.code === '010'){
+                  this.$router.push('/login');
+                } else if (res.code === '000') {
+                  request({
+                    url: 'file/exportExit',
+                    // responseType: 'blob'
+                  }).then((res) => {
+                    if(res.code !== '000')
+                      this.$message.error(res.message)
+                    this.downloading = false;
+                  });
+                }
+              })
+            },
+            setUnloading(){
+              this.loading.close();
+            } ,
+            setLoading(){
+              this.loading = this.$loading({
+                lock: true,
+                text: 'Loading',
+                spinner: 'el-icon-loading',
+                background: 'rgba(0, 0, 0, 0.7)'
+              });
             }
+
         }
     }
 </script>
 
 <style scoped lang="less">
+    .el-menu.el-menu--horizontal{
+      border-bottom: 0;
+
+    }
     #back-stage-controller{
         min-height: 100%;
 
@@ -117,11 +343,16 @@
             position: fixed;
             z-index: 2000;
             width: 100%;
+           #option-menu {
+             float: left;
 
+             //background-color: ;
+           }
             #back-stage-header-text{
                 text-align: center;
                 width: 400px;
                 padding-top: 10px;
+                float: left;
                 #back-stage-header-title{
                     color: #eee;
                     font-weight: bold;

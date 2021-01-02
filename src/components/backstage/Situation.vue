@@ -2,7 +2,10 @@
     <div id="back-stage-situation">
         <div id="operation-history-btn-bar" class="clearfix">
             <div id="operation-history-btn">
-                <el-button type="primary" @click="drawer = true">查看操作历史</el-button>
+                <el-button type="primary" @click="drawer = true" icon="el-icon-date">查看操作历史</el-button>
+            </div>
+            <div id="reset-info-btn">
+                <el-button type="primary" @click="reset()" icon="el-icon-refresh-right" :loading="resetting">重置所有信息</el-button>
             </div>
         </div>
         <el-divider/>
@@ -210,7 +213,14 @@
                 drawer: false,
                 downloadingResult: false,
                 downloadingExitQueue: false,
+                resetting: false,
                 statePermissionTable: {
+                    //state 0 -> system initial
+                    //state 1 -> have student info but no major
+                    //state 2 -> have major info but no stu
+                    //state 3 -> have major info and stu info -> 可以开始录取
+                    //state 4 -> finish admit （完成录取）
+                    //state 5 -> finish adjust
                     uploadFile: [0, 1, 2, 3, 5],
                     preEnroll: [3],
                     preAdjust: [4],
@@ -290,19 +300,22 @@
                 })
             },
             reset(){
-                request({
-                    url: 'student/reset'
-                }) .then( res => {
+                if(confirm("确认重置所有信息吗？这将使当前结果全部清空！！")){
+                  this.loading=true;
+                  request({
+                    url: 'status/reset'
+                  }) .then( res => {
                     if (res.code === '000'){
-                        this.$message.success('重置成功');
-                        this.getStatus();
-                        this.getLogList();
+                      this.$message.success('重置成功');
+                      this.getStatus();
+                      this.getLogList();
                     } else {
-                        this.$message.error('重置失败');
+                      this.$message.error('重置失败');
                     }
-                }).catch(err => {
+                  }).catch(err => {
                     this.$message.error('系统错误')
-                })
+                  })
+                }
             },
             formalReady(){
                 request({
@@ -374,7 +387,7 @@
                     }
                 })
             },
-          downloadExitQueue(){
+            downloadExitQueue(){
             this.downloadingExitQueue = true;
             request({
               url: 'login/checkLogin'
@@ -423,6 +436,10 @@
     #operation-history-btn{
         float: right;
         margin-right: 30px;
+    }
+    #reset-info-btn{
+       float: right;
+       margin-right: 10px;
     }
     
     .operation-wrap{

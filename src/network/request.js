@@ -17,9 +17,21 @@ export function request(options){
     });
 
     instance.interceptors.response.use(res => {
+        console.log(res);
         if (res.data.code === '010'){
             router.push('/login');
             store.commit('doLogout');
+        }
+        if (res.headers.contentType === 'application/vnd.ms-excel'){
+            const url = window.URL.createObjectURL(new Blob([res]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', '退档结果.xlsx');
+            document.body.appendChild(link);
+            link.click();
+            return {
+                code: '000',
+            }
         }
         return res.data;
     }, err => {
