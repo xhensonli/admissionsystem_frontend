@@ -22,12 +22,19 @@ export function request(options){
             router.push('/login');
             store.commit('doLogout');
         }
-        if (res.headers.contentType === 'application/vnd.ms-excel'){
-            const url = window.URL.createObjectURL(new Blob([res]));
+        // console.log(res.headers.contentType)
+        if (res.headers['content-type'].indexOf('application/vnd.ms-excel')!==-1){
+            console.log(456)
+            const url = window.URL.createObjectURL(new Blob([res.data]));
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', '退档结果.xlsx');
+            if(res.config.url === "file/exportExit")
+                link.setAttribute('download', '退档结果.xlsx');
+            else {
+                link.setAttribute('download', '录取结果.xlsx');
+            }
             document.body.appendChild(link);
+
             link.click();
             return {
                 code: '000',

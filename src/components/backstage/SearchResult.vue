@@ -105,7 +105,8 @@
                     return;
                 }
 
-                let url = this.select === '1' ? 'student/searchStudent':'student/searchStudentByCandidate';
+                let url = this.select === '1' ? 'student/searchStudent':'student/searchStudent' +
+                    'yCandidate';
                 this.setLoading();
                 request({
                     url,

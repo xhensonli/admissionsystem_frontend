@@ -55,7 +55,7 @@
                         label="招生数目">
                 </el-table-column>
                 <el-table-column
-                        v-if="$store.state.status === 2 || $store.state.status === 3 || $store.state.status === 5"
+                        v-if="$store.state.status === 1 || $store.state.status === 2 "
                         fixed="right"
                         label="操作"
                         >
@@ -128,10 +128,7 @@
                         this.$message.error('系统错误')
                     })
                 }).catch(() => {
-                    this.$message({
-                        type: 'info',
-                        message: '取消输入'
-                    });
+
                 });
             }
         },

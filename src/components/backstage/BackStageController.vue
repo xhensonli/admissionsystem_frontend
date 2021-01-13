@@ -1,16 +1,20 @@
 <script src="../../../babel.config.js"></script>
    <template>
-    <div id="back-stage-controller" class="clearfix">
-        <div id="back-stage-controller-header">
-            <div id="back-stage-header-text">
-                <div id="back-stage-header-title">
-                    志愿录取系统
-                </div>
-                <div id="back-stage-header-title-eng">
-                    ADMISSION SYSTEM
-                </div>
-            </div>
-            <div id="option-menu">
+
+       <div id="back-stage-controller" class="clearfix">
+
+           <div id="back-stage-controller-header">
+             <div id="back-stage-header-text">
+               <div id="back-stage-header-title">
+                 志愿录取系统
+<!--                 {{$store.state.status}}-->
+               </div>
+               <div id="back-stage-header-title-eng">
+                 ADMISSION SYSTEM
+               </div>
+             </div>
+          <el-container>
+            <el-header>
               <el-menu class="el-menu-demo" mode="horizontal"
                        background-color="#0984d9"
                        @select="handleSelect"
@@ -23,97 +27,107 @@
                       action=""
                       :http-request="uploadMajor"
                       :show-file-list="false"
+                      :disabled="!statePermissionTable.uploadMajorInfo.includes($store.state.status)"
+
                   >
-                  <el-menu-item index="1-1">导入专业录取计划文件</el-menu-item>
+                    <el-menu-item index="1-1"  :disabled="!statePermissionTable.uploadMajorInfo.includes($store.state.status)" width=100%>导入专业录取计划文件</el-menu-item>
+
                   </el-upload>
                   <el-upload
                       action=""
-                      :http-request="uploadStudent"
+                      :http-request="uploadStudent "
                       :show-file-list="false"
+                      :disabled="!statePermissionTable.uploadStuInfo.includes($store.state.status)"
                   >
-                  <el-menu-item index="1-2">导入学生志愿信息文件</el-menu-item>
+                    <el-menu-item index="1-2"  :disabled="!statePermissionTable.uploadStuInfo.includes($store.state.status)">导入学生志愿信息文件</el-menu-item>
                   </el-upload>
                 </el-submenu>
+                <!--                <el-submenu index="2">-->
+                <!--                  <template slot="title">预录取操作</template>-->
+                <!--                  <el-menu-item index="2-1" @click="doEnroll">开始预录取</el-menu-item>-->
+                <!--                  <el-menu-item index="2-2" @click="doAdjust">开始预调剂</el-menu-item>-->
+                <!--                </el-submenu>-->
                 <el-submenu index="2">
-                  <template slot="title">预录取操作</template>
-                  <el-menu-item index="2-1" @click="doEnroll">开始预录取</el-menu-item>
-                  <el-menu-item index="2-2" @click="doAdjust">开始预调剂</el-menu-item>
+                  <template slot="title">录取和调剂</template>
+                  <el-menu-item index="2-1" @click="doEnroll" :disabled = "!statePermissionTable.enrollable.includes($store.state.status)">开始录取</el-menu-item>
+                  <el-menu-item index="2-2" @click="doAdjust" :disabled="!statePermissionTable.adjustable.includes($store.state.status)">执行调剂</el-menu-item>
                 </el-submenu>
                 <el-submenu index="3">
-                    <template slot="title">正式录取</template>
-                    <el-menu-item index="3-1" @click="doEnroll">开始录取</el-menu-item>
-                    <el-menu-item index="3-2" @click="doAdjust">执行调剂</el-menu-item>
-                </el-submenu>
-                <el-submenu index="4">
-                    <template slot="title">导出结果</template>
-                    <el-menu-item index="4-1" @click="downloadResult" class="el-icon-download">导出最终录取结果</el-menu-item><br>
-                    <el-menu-item index="4-2" @click="downloadExitQueue" class="el-icon-download">导出退档结果</el-menu-item>
+                  <template slot="title">导出结果</template>
+                  <el-menu-item index="3-1" @click="downloadResult" class="el-icon-download" :disabled="!statePermissionTable.downloadable.includes($store.state.status)">导出最终录取结果</el-menu-item><br>
+                  <el-menu-item index="3-2" @click="downloadExitQueue" class="el-icon-download" :disabled="!statePermissionTable.downloadable.includes($store.state.status)">导出退档结果</el-menu-item>
                 </el-submenu>
 
               </el-menu>
+            </el-header>
+          </el-container>
 
-            </div>
-            <el-popover
-                    placement="top-start"
-                    width="200"
-                    trigger="hover"
-                    >
-                <div id="logout-link">
-                    <el-link @click="logout">注销登录</el-link>
-                </div>
-                <div id="back-stage-controller-header-avatar"  slot="reference"></div>
-            </el-popover>
-        </div>
+         <el-popover
+             placement="top-start"
+             width="200"
+             trigger="hover"
+         >
+           <div id="logout-link">
+             <el-link @click="logout">注销登录</el-link>
+           </div>
+           <div id="back-stage-controller-header-avatar"  slot="reference"></div>
+         </el-popover>
+       </div>
 
-        <div id="back-stage-controller-menu">
-            <el-menu
-                    :router="true"
-                    :default-active="$route.path.substr(11) || 'situation'"
-                    class="el-menu-vertical-demo"
-                    @open="handleOpen"
-                    @close="handleClose"
-                    background-color="#fff"
-                    text-color="#999"
-                    active-text-color="#8DC4F9">
 
-                <el-menu-item index="situation">
-                    <i class="el-icon-s-home"></i>
-                    <span slot="title">概况</span>
-                </el-menu-item>
-                <el-menu-item index="studentPlan">
-                    <i class="el-icon-reading"></i>
-                    <span slot="title">招生计划</span>
-                </el-menu-item>
-                <el-menu-item index="studentInfo">
-                    <i class="el-icon-info"></i>
-                    <span slot="title">学生信息</span>
-                </el-menu-item>
-                <el-submenu index="4" >
-                    <template slot="title">
-                        <i class="el-icon-document"></i>
-                        <span >录取结果</span>
-                    </template>
-                    <el-menu-item index="result">全部结果</el-menu-item>
-                    <el-menu-item index="searchResult">搜索查询</el-menu-item>
-                    <el-menu-item index="adjustQueue">调剂队列</el-menu-item>
-                    <el-menu-item index="exitQueue">退档队列</el-menu-item>
-                </el-submenu>
-                <el-submenu index="5">
-                    <template slot="title">
-                        <i class="el-icon-s-data"></i>
-                        <span>数据分析</span>
-                    </template>
-                    <el-menu-item index="gradeAnalyze">成绩分析</el-menu-item>
-                    <el-menu-item index="countDistribute">人数分布</el-menu-item>
-                    <el-menu-item index="gradeDistribute">成绩区间分布</el-menu-item>
-                    <el-menu-item index="geoDistribute">生源地分布</el-menu-item>
-                </el-submenu>
-            </el-menu>
-        </div>
-        <div id="back-stage-controller-main">
-            <router-view/>
-        </div>
-    </div>
+         <div id="back-stage-controller-menu">
+           <el-menu
+               :router="true"
+               :default-active="$route.path.substr(11) || 'situation'"
+               class="el-menu-vertical-demo"
+               @open="handleOpen"
+               @close="handleClose"
+               background-color="#fff"
+               text-color="#999"
+               active-text-color="#8DC4F9">
+
+             <el-menu-item index="situation">
+               <i class="el-icon-s-home"></i>
+               <span slot="title">系统概况</span>
+             </el-menu-item>
+             <el-menu-item index="studentPlan">
+               <i class="el-icon-reading"></i>
+               <span slot="title">招生计划</span>
+             </el-menu-item>
+             <el-menu-item index="studentInfo">
+               <i class="el-icon-info"></i>
+               <span slot="title">学生信息</span>
+             </el-menu-item>
+             <el-submenu index="4" >
+               <template slot="title">
+                 <i class="el-icon-document"></i>
+                 <span >录取结果</span>
+               </template>
+               <el-menu-item index="result">全部结果</el-menu-item>
+               <el-menu-item index="searchResult">搜索查询</el-menu-item>
+               <el-menu-item index="adjustQueue">调剂队列</el-menu-item>
+               <el-menu-item index="exitQueue">退档队列</el-menu-item>
+             </el-submenu>
+             <el-submenu index="5">
+               <template slot="title">
+                 <i class="el-icon-s-data"></i>
+                 <span>数据分析</span>
+               </template>
+               <el-menu-item index="gradeAnalyze">成绩分析</el-menu-item>
+               <el-menu-item index="countDistribute">人数分布</el-menu-item>
+               <el-menu-item index="gradeDistribute">成绩区间分布</el-menu-item>
+               <el-menu-item index="geoDistribute">生源地分布</el-menu-item>
+             </el-submenu>
+           </el-menu>
+         </div>
+
+
+       <div id="back-stage-controller-main">
+         <router-view/>
+       </div>
+     </div>
+
+
 </template>
 
 <script>
@@ -122,6 +136,23 @@
 
     export default {
         name: "BackStageController",
+        data(){
+            return{
+              state: 0,
+              statePermissionTable: {
+                //state 0 -> system initial
+                //state 1 -> have major info but no stu
+                //state 2 -> have major info and stu info -> 可以开始录取
+                //state 3 -> finish admit （完成录取）
+                //state 4 -> finish adjust can download
+                uploadMajorInfo: [0],
+                uploadStuInfo:[1],
+                enrollable: [2],
+                adjustable: [3],
+                downloadable:[4]
+              },
+            }
+        },
         methods: {
             handleOpen(key, keyPath) {
                 console.log(key, keyPath);
@@ -146,19 +177,7 @@
                   })
               },
             getStatus(){
-              // this.setLoading();
-              request({
-                url: 'status/getStatus'
-              }).then(res => {
-                if (res.code === '000') {
-                  this.state = res.data === null ? 0 : res.data;
-                  this.$store.commit("setStatus", this.state)
-                } else {
-                  this.$message.error(res.message)
-                }
-              }).catch(err => {
-                this.$message.error('系统错误')
-              })
+              this.$store.dispatch('getStatus')
             },
             getLogList(){
               request({
@@ -283,7 +302,7 @@
                 } else if (res.code === '000') {
                   request({
                     url: 'file/exportResult',
-                    // responseType: 'blob'
+                    responseType: 'blob'
                   }).then((res) => {
                     if(res.code !== '000')
                       this.$message.error(res.message)
@@ -302,7 +321,7 @@
                 } else if (res.code === '000') {
                   request({
                     url: 'file/exportExit',
-                    // responseType: 'blob'
+                    responseType: 'blob'
                   }).then((res) => {
                     if(res.code !== '000')
                       this.$message.error(res.message)
